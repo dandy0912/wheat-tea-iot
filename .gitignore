@@ -1,0 +1,122 @@
+# =======================================================================
+# 嵌入式端 (STM32 / Keil MDK / STM32CubeIDE)
+# =======================================================================
+# 忽略 Keil 编译生成的庞大中间文件和临时文件
+**/OBJ/
+**/List/
+**/build/
+*.o
+*.d
+*.crf
+*.lnp
+*.axf
+*.htm
+*.sct
+*.dep
+*.lst
+*.map
+*.iex
+*.i
+*.vopt
+*.bak
+*.__i
+*.pbi
+*.pbd
+
+# 忽略 Keil 用户的本地个性化配置
+*.uvgui.*
+*.uv2.bak
+*.uvoptx.bak
+*.wdg
+
+# 忽略 STM32CubeMX 自动生成的备份和生成日志
+*.mxproject
+~*
+
+# =======================================================================
+# HiSpark Studio / OpenHarmony / Eclipse 编译环境
+# =======================================================================
+# 忽略编译输出目录（通常会把所有的 .o, .bin, .elf 放在 out 或 output 文件夹下）
+**/out/
+**/output/
+**/build_cache/
+
+# 忽略 GN 和 Ninja 编译工具链产生的临时缓存与描述文件
+**.ninja
+**.ninja_deps
+**.ninja_log
+**/.gn
+**/args.gn
+
+# 忽略 HiSpark Studio (Eclipse / VS Code 内核) 自带的项目配置文件
+#（这些文件包含本地的绝对路径，传到 GitHub 会导致队友的 IDE 报路径错误）
+**/.metadata/
+**/.settings/
+**/.project
+**/.cproject
+**/.pydevproject
+**/.factorypath
+
+# 忽略编译过程中的日志文件
+**/build.log
+**/compile_commands.json
+
+# 忽略本地用户特有的配置（如历史打开的文件、断点信息）
+**/.vscode/
+**/.idea/
+*.userdata
+
+# =======================================================================
+# Python 上位机 & AI 模型端 (Python / PyTorch)
+# =======================================================================
+# 忽略 Python 字节码缓存（这会导致组员代码冲突）
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# 忽略 Python 虚拟环境
+.venv/
+venv/
+env/
+ENV/
+
+# 忽略 Jupyter Notebook 的缓存
+.ipynb_checkpoints/
+
+# 忽略打包生成的 build/dist 以及 egg-info（如果用 pyinstaller 打包上位机的话）
+bin/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+
+
+# =======================================================================
+# 操作系统、IDE 与其它
+# =======================================================================
+# 忽略操作系统的隐藏文件
+.DS_Store
+Thumbs.db
+
+# 忽略主流编辑器的本地配置
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+*.log
+
+.claude/
+.opencode/
+CLAUDE.md
