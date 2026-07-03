@@ -2,10 +2,18 @@
 告警记录管理
 对接 VPS /api/v1/disease/list
 """
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTableWidget,
-                             QTableWidgetItem, QHeaderView, QLabel, QComboBox)
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class AlarmWidget(QWidget):
@@ -38,17 +46,19 @@ class AlarmWidget(QWidget):
         layout.addWidget(self.table)
 
         self.setLayout(layout)
+        interval = self.api.cfg.get("refresh_interval", 5000)
         self.timer = QTimer()
         self.timer.timeout.connect(self._load)
-        self.timer.start(5000)
+        self.timer.start(interval)
         self._load()
+
+    def cleanup(self):
+        self.timer.stop()
 
     def _load(self):
         sev = self.severity_cb.currentText()
-        params = {"page": 1, "page_size": 100}
-        if sev != "全部":
-            params["severity"] = sev
-        res = self.api.raw_get("/disease/list", params)
+        severity = sev if sev != "全部" else None
+        res = self.api.alarm_list(page=1, page_size=100, severity=severity)
         if res.get("code") != 0:
             return
         records = res.get("data", {}).get("records", [])

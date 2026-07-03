@@ -2,10 +2,18 @@
 历史数据查询
 对接 VPS /api/v1/sensor/history
 """
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTableWidget,
-                             QTableWidgetItem, QHeaderView, QPushButton,
-                             QDateTimeEdit, QLabel)
 from PyQt5.QtCore import QDateTime
+from PyQt5.QtWidgets import (
+    QDateTimeEdit,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class HistoryWidget(QWidget):
@@ -19,12 +27,12 @@ class HistoryWidget(QWidget):
         time_layout.addWidget(QLabel("起始:"))
         self.start_dt = QDateTimeEdit()
         self.start_dt.setDateTime(QDateTime.currentDateTime().addDays(-1))
-        self.start_dt.setDisplayFormat("yyyy-MM-dd hh:mm:ss")
+        self.start_dt.setDisplayFormat("yyyy-MM-ddThh:mm:ss")
         time_layout.addWidget(self.start_dt)
         time_layout.addWidget(QLabel("结束:"))
         self.end_dt = QDateTimeEdit()
         self.end_dt.setDateTime(QDateTime.currentDateTime())
-        self.end_dt.setDisplayFormat("yyyy-MM-dd hh:mm:ss")
+        self.end_dt.setDisplayFormat("yyyy-MM-ddThh:mm:ss")
         time_layout.addWidget(self.end_dt)
         query_btn = QPushButton("查询")
         query_btn.setStyleSheet("background: #1a6b3c; color: #fff; border: none; "
@@ -52,9 +60,9 @@ class HistoryWidget(QWidget):
         self.setLayout(layout)
 
     def _query(self):
-        start = self.start_dt.dateTime().toString("yyyy-MM-dd hh:mm:ss")
-        end = self.end_dt.dateTime().toString("yyyy-MM-dd hh:mm:ss")
-        device_id = self.api.cfg.get("device_id", "wheat_001")
+        start = self.start_dt.dateTime().toString("yyyy-MM-ddThh:mm:ss")
+        end = self.end_dt.dateTime().toString("yyyy-MM-ddThh:mm:ss")
+        device_id = self.api.cfg.get("device_id", "farmeye_guard_ws63")
         res = self.api.history(device_id, start=start, end=end)
         if res.get("code") != 0:
             self.count_label.setText(f"查询失败: {res.get('msg', '')}")

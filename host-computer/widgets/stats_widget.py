@@ -3,14 +3,14 @@
 对接 VPS /api/v1/disease/stats
 饼图: 按严重程度 / 按作物 / 按病害类型
 """
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGroupBox,
-                             QLabel, QPushButton)
-from PyQt5.QtCore import Qt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 import matplotlib
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+
 plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
 plt.rcParams['axes.unicode_minus'] = False
 
@@ -85,7 +85,7 @@ class StatsWidget(QWidget):
                 colors=colors[:len(labels)], startangle=90,
                 pctdistance=0.75,
             )
-            ax.legend(wedges, [f"{l} ({s})" for l, s in zip(labels, sizes)],
+            ax.legend(wedges, [f"{lb} ({s})" for lb, s in zip(labels, sizes)],
                       loc="upper right", fontsize=7)
             ax.set_title(title, fontsize=10)
         canvas.draw_idle()

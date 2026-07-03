@@ -1,0 +1,30 @@
+[project]
+name = "host-computer"
+version = "1.0.0"
+description = "农眼卫士 — 上位机监控系统"
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"widgets/dashboard.py" = ["I001"]
+"widgets/stats_widget.py" = ["I001"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+warn_return_any = false
+warn_unused_configs = true
+exclude = ["__pycache__/", "tests/"]

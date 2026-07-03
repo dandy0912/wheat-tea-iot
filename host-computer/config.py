@@ -11,7 +11,7 @@ DEFAULT_CONFIG = {
     "server_url": "http://127.0.0.1:8000",
     "server_api_key": "",
     "refresh_interval": 3000,
-    "device_id": "wheat_001",
+    "device_id": "farmeye_guard_ws63",
 }
 
 

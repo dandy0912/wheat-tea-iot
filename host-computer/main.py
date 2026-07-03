@@ -3,17 +3,28 @@
 PyQt5 桌面应用，对接 VPS 后端
 """
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QTabWidget,
-                             QMenuBar, QAction, QDialog, QVBoxLayout,
-                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                             QMessageBox, QStatusBar)
-from PyQt5.QtCore import Qt
 
-from config import load as load_config, save as save_config
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QStatusBar,
+    QTabWidget,
+    QVBoxLayout,
+)
+
 from api_client import ApiClient
-from widgets.dashboard import DashboardWidget
+from config import load as load_config
+from config import save as save_config
 from widgets.alarm_widget import AlarmWidget
 from widgets.control_widget import ControlWidget
+from widgets.dashboard import DashboardWidget
 from widgets.history_widget import HistoryWidget
 from widgets.stats_widget import StatsWidget
 
@@ -40,7 +51,7 @@ class SettingsDialog(QDialog):
 
         h3 = QHBoxLayout()
         h3.addWidget(QLabel("设备 ID:"))
-        self.device_edit = QLineEdit(cfg.get("device_id", "wheat_001"))
+        self.device_edit = QLineEdit(cfg.get("device_id", "farmeye_guard_ws63"))
         h3.addWidget(self.device_edit)
         layout.addLayout(h3)
 

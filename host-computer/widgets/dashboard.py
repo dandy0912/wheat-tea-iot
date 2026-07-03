@@ -2,13 +2,20 @@
 实时监控仪表盘
 对接 VPS /api/v1/sensor/latest
 """
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-                             QGroupBox, QGridLayout, QFrame)
-from PyQt5.QtCore import QTimer
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
 import matplotlib
 matplotlib.use("Qt5Agg")
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import (
+    QFrame,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -98,12 +105,16 @@ class DashboardWidget(QWidget):
 
         self.setLayout(layout)
 
+        interval = self.api.cfg.get("refresh_interval", 3000)
         self.timer = QTimer()
         self.timer.timeout.connect(self._refresh)
-        self.timer.start(3000)
+        self.timer.start(interval)
+
+    def cleanup(self):
+        self.timer.stop()
 
     def _refresh(self):
-        device_id = self.api.cfg.get("device_id", "wheat_001")
+        device_id = self.api.cfg.get("device_id", "farmeye_guard_ws63")
         res = self.api.latest(device_id=device_id)
         if res.get("code") != 0:
             return
@@ -117,7 +128,6 @@ class DashboardWidget(QWidget):
         self.cards["氮(N)"].update_value(data.get("soil_n"))
         self.cards["磷(P)"].update_value(data.get("soil_p"))
         self.cards["钾(K)"].update_value(data.get("soil_k"))
-        self.cards["温度"].update_value(data.get("temperature"))
 
         self._time_data.append("")
         self._temp_data.append(data.get("temperature", 0) or 0)

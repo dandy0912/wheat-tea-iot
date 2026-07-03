@@ -1,0 +1,38 @@
+name: host-computer CI
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths: ["host-computer/**", ".github/**"]
+  pull_request:
+    branches: ["main", "master"]
+    paths: ["host-computer/**", ".github/**"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: host-computer
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+
+      - name: ruff — code style & lint
+        run: ruff check .
+
+      - name: mypy — static type check
+        run: mypy .
+
+      - name: pytest — unit tests (core)
+        run: python -m pytest tests/test_core.py -v --tb=short

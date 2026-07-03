@@ -2,17 +2,24 @@
 设备控制面板
 对接 VPS /api/v1/device/list + /api/v1/command/send + /api/v1/command/logs
 """
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-                             QTableWidget, QTableWidgetItem, QHeaderView,
-                             QGroupBox, QLabel)
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
-
+# API 指令格式: {cmd} ON / {cmd} OFF（空格分隔）
 DEVICES = [
-    ("pump_irrigate", "灌溉器", "#3498db", "💧"),
-    ("fan", "风机", "#2ecc71", "🌀"),
+    ("irrig", "灌溉器", "#3498db", "💧"),
     ("light", "补光灯", "#f39c12", "💡"),
-    ("fertilizer", "施肥器", "#9b59b6", "🌱"),
+    ("spray", "喷雾器", "#2ecc71", "🌫"),
+    ("fertilize", "施肥器", "#9b59b6", "🌱"),
 ]
 
 
@@ -78,8 +85,8 @@ class ControlWidget(QWidget):
 
     def _control(self, cmd_id, name):
         btn = self._btns[name]
-        cmd = f"{cmd_id}_off" if btn._on else f"{cmd_id}_on"
-        device_id = self.api.cfg.get("device_id", "wheat_001")
+        cmd = f"{cmd_id} OFF" if btn._on else f"{cmd_id} ON"
+        device_id = self.api.cfg.get("device_id", "farmeye_guard_ws63")
         res = self.api.device_control(device_id, cmd)
         if res.get("code") == 0:
             btn._on = not btn._on

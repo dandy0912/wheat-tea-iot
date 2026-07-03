@@ -1,0 +1,7 @@
+# Core runtime deps (no PyQt/matplotlib — not needed for unit tests)
+requests>=2.31
+
+# Testing & code quality
+pytest>=8.3
+ruff>=0.6
+mypy>=1.11
