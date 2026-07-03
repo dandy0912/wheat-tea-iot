@@ -59,7 +59,7 @@ class ControlWidget(QWidget):
         super().__init__()
         self.api = api_client
         self.current_device_id = None  # None 表示全部设备
-        
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(16)
@@ -67,25 +67,25 @@ class ControlWidget(QWidget):
         # 4个主控制开关
         self.ctrl_box = QGroupBox("远程控制器")
         ctrl_layout = QVBoxLayout(self.ctrl_box)
-        
+
         self.btn_layout = QHBoxLayout()
         self.btn_layout.setSpacing(12)
         self._btns = {}
-        
+
         for cmd_id, name, color, icon in DEVICES:
             btn = DeviceBtn(cmd_id, name, color, icon)
             btn.clicked.connect(lambda checked, c=cmd_id, n=name: self._control(c, n))
             self._btns[name] = btn
             self.btn_layout.addWidget(btn)
-            
+
         ctrl_layout.addLayout(self.btn_layout)
-        
+
         # 禁用提示
         self.tip_lbl = QLabel("⚠️ 请在左侧选择特定设备以启用控制功能")
         self.tip_lbl.setStyleSheet("color: #ffb74d; font-size: 13px; font-weight: bold; padding: 4px;")
         self.tip_lbl.setVisible(True)
         ctrl_layout.addWidget(self.tip_lbl)
-        
+
         layout.addWidget(self.ctrl_box)
 
         # 设备列表
@@ -184,7 +184,7 @@ class ControlWidget(QWidget):
         status_text = "运行中" if btn._on else "已关闭"
         icon_dot = "🟢" if btn._on else "🔴"
         btn.setText(f"{btn._icon} {btn._name}\n{icon_dot} {status_text}")
-        
+
         if btn._on:
             bg = btn._color
             color = "#ffffff"
@@ -211,10 +211,10 @@ class ControlWidget(QWidget):
     def _control(self, cmd_id, name):
         if not self.current_device_id:
             return
-            
+
         btn = self._btns[name]
         cmd = f"{cmd_id} OFF" if btn._on else f"{cmd_id} ON"
-        
+
         res = self.api.device_control(self.current_device_id, cmd)
         if res.get("code") == 0:
             btn._on = not btn._on
@@ -238,7 +238,7 @@ class ControlWidget(QWidget):
             self.log_table.setItem(row, 1, QTableWidgetItem(d.get("device_id", "")))
             self.log_table.setItem(row, 2, QTableWidgetItem(d.get("command", "")))
             self.log_table.setItem(row, 3, QTableWidgetItem(d.get("source", "")))
-            
+
             result_code = d.get("result_code", 0)
             res_item = QTableWidgetItem("成功" if result_code == 0 else d.get("result_msg", "失败"))
             if result_code == 0:
@@ -261,7 +261,7 @@ class ControlWidget(QWidget):
         for row, d in enumerate(devices):
             self.status_table.setItem(row, 0, QTableWidgetItem(d.get("device_id", "")))
             self.status_table.setItem(row, 1, QTableWidgetItem(d.get("device_name", "") or "--"))
-            
+
             online = d.get("online", False)
             status_item = QTableWidgetItem("在线 🟢" if online else "离线 🔴")
             if online:
@@ -269,7 +269,7 @@ class ControlWidget(QWidget):
             else:
                 status_item.setForeground(QColor("#e57373"))
             self.status_table.setItem(row, 2, status_item)
-            
+
             self.status_table.setItem(row, 3, QTableWidgetItem((d.get("last_seen") or "")[:19]))
 
             for col in range(4):

@@ -30,28 +30,28 @@ class HistoryWidget(QWidget):
         # 筛选工具栏
         time_layout = QHBoxLayout()
         time_layout.setSpacing(8)
-        
+
         time_layout.addWidget(QLabel("起始时间:"))
         self.start_dt = QDateTimeEdit()
         self.start_dt.setDateTime(QDateTime.currentDateTime().addDays(-1))
         self.start_dt.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
         self.start_dt.setCalendarPopup(True)
         time_layout.addWidget(self.start_dt)
-        
+
         time_layout.addWidget(QLabel("结束时间:"))
         self.end_dt = QDateTimeEdit()
         self.end_dt.setDateTime(QDateTime.currentDateTime())
         self.end_dt.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
         self.end_dt.setCalendarPopup(True)
         time_layout.addWidget(self.end_dt)
-        
+
         self.query_btn = QPushButton("🔍 查询")
         self.query_btn.setStyleSheet("""
             QPushButton {
-                background-color: #4cd9c0; 
-                color: #ffffff; 
-                border: none; 
-                padding: 6px 20px; 
+                background-color: #4cd9c0;
+                color: #ffffff;
+                border: none;
+                padding: 6px 20px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -97,7 +97,7 @@ class HistoryWidget(QWidget):
         has_device = self.current_device_id is not None
         self.query_btn.setEnabled(has_device)
         self.table.setRowCount(0)
-        
+
         if not has_device:
             self.count_label.setText("⚠️ 请在左侧选择具体设备后再查询历史数据")
             self.count_label.setStyleSheet("color: #ffb74d; font-weight: bold;")
@@ -108,20 +108,20 @@ class HistoryWidget(QWidget):
     def _query(self):
         if not self.current_device_id:
             return
-            
+
         start = self.start_dt.dateTime().toString("yyyy-MM-ddThh:mm:ss")
         end = self.end_dt.dateTime().toString("yyyy-MM-ddThh:mm:ss")
-        
+
         res = self.api.history(self.current_device_id, start=start, end=end)
-        
+
         if res.get("code") != 0:
             self.count_label.setText(f"查询失败: {res.get('msg') or res.get('message') or '未知错误'}")
             self.count_label.setStyleSheet("color: #e57373; font-weight: bold;")
             return
-            
+
         records = res.get("data", {}).get("records", [])
         self.table.setRowCount(len(records))
-        
+
         for row, d in enumerate(records):
             self.table.setItem(row, 0, QTableWidgetItem((d.get("timestamp") or "")[:19]))
             self.table.setItem(row, 1, QTableWidgetItem(f"{d.get('temperature', '--')}"))
@@ -132,7 +132,7 @@ class HistoryWidget(QWidget):
             self.table.setItem(row, 6, QTableWidgetItem(f"{d.get('soil_p', '--')}"))
             self.table.setItem(row, 7, QTableWidgetItem(f"{d.get('soil_k', '--')}"))
             self.table.setItem(row, 8, QTableWidgetItem(f"{d.get('distance', '--')}"))
-            
+
             alarm = d.get("alarm_flag", 0)
             alarm_item = QTableWidgetItem(str(alarm))
             if alarm > 0:
@@ -147,6 +147,6 @@ class HistoryWidget(QWidget):
                 item = self.table.item(row, col)
                 if item:
                     item.setTextAlignment(Qt.AlignCenter)
-                    
+
         self.count_label.setText(f"共查询到 {len(records)} 条历史记录")
         self.count_label.setStyleSheet("color: #4cd9c0; font-weight: bold;")

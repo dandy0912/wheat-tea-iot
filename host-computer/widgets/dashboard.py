@@ -4,8 +4,6 @@
 """
 import matplotlib
 matplotlib.use("Qt5Agg")
-matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
-matplotlib.rcParams['axes.unicode_minus'] = False
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt5.QtCore import QTimer
@@ -18,6 +16,9 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -61,15 +62,15 @@ class SensorCard(QFrame):
 
         self.title_lbl = QLabel(f"{icon}  {title}")
         self.title_lbl.setStyleSheet("color: #7f8c8d; font-size: 13px; font-weight: bold;")
-        
+
         self.value_lbl = QLabel("--")
         self.value_lbl.setStyleSheet(f"color: {color}; font-size: 26px; font-weight: bold;")
-        
+
         self.unit_lbl = QLabel(unit)
         self.unit_lbl.setStyleSheet("color: #7f8c8d; font-size: 12px; font-weight: 500;")
-        
+
         layout.addWidget(self.title_lbl)
-        
+
         h = QHBoxLayout()
         h.addWidget(self.value_lbl)
         h.addWidget(self.unit_lbl)
@@ -91,7 +92,7 @@ class DashboardWidget(QWidget):
         super().__init__()
         self.api = api_client
         self.current_device_id = None  # None 表示全部设备
-        
+
         self._time_data = []
         self._temp_data = []
         self._humi_data = []
@@ -105,7 +106,7 @@ class DashboardWidget(QWidget):
         card_grid = QGridLayout()
         card_grid.setSpacing(12)
         self.cards = {}
-        
+
         # (标题, 图标, 单位, 配色)
         titles = [
             ("温度", "🌡️", "°C", "#e57373"),        # 柔美红
@@ -116,12 +117,12 @@ class DashboardWidget(QWidget):
             ("土壤磷(P)", "🌾", "mg/kg", "#f48fb1"),  # 柔美粉
             ("土壤钾(K)", "🌿", "mg/kg", "#4cd9c0"),  # 薄荷青
         ]
-        
+
         for i, (title, icon, unit, color) in enumerate(titles):
             card = SensorCard(title, icon, unit, color)
             self.cards[title] = card
             card_grid.addWidget(card, i // 4, i % 4)
-            
+
         layout.addLayout(card_grid)
 
         # 趋势图表
@@ -148,7 +149,7 @@ class DashboardWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self._refresh)
         self.timer.start(interval)
-        
+
         self._refresh()
 
     def set_device_filter(self, device_id):
@@ -168,46 +169,46 @@ class DashboardWidget(QWidget):
 
     def _refresh(self):
         res = self.api.latest(device_id=self.current_device_id)
-        
+
         if res.get("code") != 0:
             self.alarm_dot.setStyleSheet("color: #90a4ae; font-size: 24px;")
             self.alarm_text.setText(f"连接异常: {res.get('msg') or res.get('message') or '未知错误'}")
             self.alarm_text.setStyleSheet("font-size: 14px; color: #e57373;")
             return
-            
+
         data = res.get("data")
-        
+
         if self.current_device_id is None:
             # --- 全部设备模式 (数据聚合) ---
             if not isinstance(data, list):
                 data = [data] if data else []
-                
+
             if not data:
                 for card in self.cards.values():
                     card.update_value(None)
                 self.alarm_dot.setStyleSheet("color: #90a4ae; font-size: 24px;")
                 self.alarm_text.setText("暂无任何在线设备数据")
                 return
-                
+
             # 计算各项平均值
             keys = [
-                ("temperature", "温度"), ("humidity", "湿度"), 
+                ("temperature", "温度"), ("humidity", "湿度"),
                 ("light", "光照"), ("co2", "CO₂"),
-                ("soil_n", "土壤氮(N)"), ("soil_p", "土壤磷(P)"), 
+                ("soil_n", "土壤氮(N)"), ("soil_p", "土壤磷(P)"),
                 ("soil_k", "土壤钾(K)")
             ]
-            
+
             agg_data = {}
             for field, title in keys:
                 vals = [d.get(field) for d in data if d and d.get(field) is not None]
                 agg_data[title] = sum(vals) / len(vals) if vals else None
                 self.cards[title].update_value(agg_data[title], suffix=" (均值)" if agg_data[title] is not None else "")
-                
+
             # 趋势图打点记录 (均值)
             self._time_data.append("")
             self._temp_data.append(agg_data["温度"] or 0.0)
             self._humi_data.append(agg_data["湿度"] or 0.0)
-            
+
             # 告警检测
             alarming_devices = [d.get("device_id") for d in data if d and d.get("alarm_flag", 0) > 0]
             if alarming_devices:
@@ -219,14 +220,14 @@ class DashboardWidget(QWidget):
                 self.alarm_dot.setStyleSheet("color: #4cd9c0; font-size: 24px;")
                 self.alarm_text.setText(f"系统运行正常 (全部设备就绪，共 {len(data)} 台)")
                 self.alarm_text.setStyleSheet("font-size: 14px; color: #34495e;")
-                
+
         else:
             # --- 单设备模式 ---
             if isinstance(data, list):
                 data = data[0] if data else {}
             elif data is None:
                 data = {}
-                
+
             self.cards["温度"].update_value(data.get("temperature"))
             self.cards["湿度"].update_value(data.get("humidity"))
             self.cards["光照"].update_value(data.get("light"))
@@ -234,12 +235,12 @@ class DashboardWidget(QWidget):
             self.cards["土壤氮(N)"].update_value(data.get("soil_n"))
             self.cards["土壤磷(P)"].update_value(data.get("soil_p"))
             self.cards["土壤钾(K)"].update_value(data.get("soil_k"))
-            
+
             # 趋势图记录
             self._time_data.append("")
             self._temp_data.append(data.get("temperature") or 0.0)
             self._humi_data.append(data.get("humidity") or 0.0)
-            
+
             # 告警状态
             alarm = data.get("alarm_flag", 0)
             if alarm:
@@ -262,23 +263,23 @@ class DashboardWidget(QWidget):
         ax = self.canvas.ax
         ax.clear()
         self.canvas.setup_axes()
-        
+
         x = list(range(len(self._temp_data)))
         if x:
             # 温度曲线 - 柔美红
             ax.plot(x, self._temp_data, color='#e57373', lw=2, label="温度(°C)")
             ax.fill_between(x, self._temp_data, color='#e57373', alpha=0.1)
-            
+
             # 湿度曲线 - 温柔蓝
             ax.plot(x, self._humi_data, color='#689fd2', lw=2, label="湿度(%RH)")
             ax.fill_between(x, self._humi_data, color='#689fd2', alpha=0.1)
-            
+
             ax.set_xlim(0, max(len(self._temp_data) - 1, 1))
         else:
             ax.set_xlim(0, 10)
-            
+
         ax.set_ylim(0, 100)
-        
+
         # 优雅的图例样式
         leg = ax.legend(loc="upper right", fontsize=8, frameon=True)
         if leg:

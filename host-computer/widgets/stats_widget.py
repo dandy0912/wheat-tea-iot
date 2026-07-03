@@ -5,12 +5,13 @@
 """
 import matplotlib
 matplotlib.use("Qt5Agg")
-matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
-matplotlib.rcParams['axes.unicode_minus'] = False
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+
+matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 
 class MplCanvas(FigureCanvas):
@@ -25,7 +26,7 @@ class StatsWidget(QWidget):
         super().__init__()
         self.api = api_client
         self.current_device_id = None  # None 表示全部设备
-        
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(16)
@@ -35,10 +36,10 @@ class StatsWidget(QWidget):
         refresh_btn = QPushButton("🔄 刷新统计")
         refresh_btn.setStyleSheet("""
             QPushButton {
-                background-color: #4cd9c0; 
-                color: #ffffff; 
-                border: none; 
-                padding: 8px 24px; 
+                background-color: #4cd9c0;
+                color: #ffffff;
+                border: none;
+                padding: 8px 24px;
                 font-weight: bold;
             }
             QPushButton:hover {
@@ -53,15 +54,15 @@ class StatsWidget(QWidget):
         # 图表展示区域
         chart_layout = QHBoxLayout()
         chart_layout.setSpacing(12)
-        
+
         from PyQt5.QtWidgets import QSizePolicy
         self.canvas_severity = MplCanvas()
         self.canvas_crop = MplCanvas()
         self.canvas_disease = MplCanvas()
-        
+
         for canvas in [self.canvas_severity, self.canvas_crop, self.canvas_disease]:
             canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
+
         chart_layout.addWidget(self.canvas_severity)
         chart_layout.addWidget(self.canvas_crop)
         chart_layout.addWidget(self.canvas_disease)
@@ -103,25 +104,25 @@ class StatsWidget(QWidget):
             res = self.api.alarm_list(page=1, page_size=1000, device_id=self.current_device_id)
             if res.get("code") == 0:
                 records = res.get("data", {}).get("records", [])
-                
+
                 # 初始化统计结构
                 by_crop = {"wheat": 0, "tea": 0}
                 by_severity = {"Mild": 0, "Moderate": 0, "Severe": 0}
                 by_disease = {"rust": 0, "powdery_mildew": 0, "anthracnose": 0, "leafhopper": 0}
-                
+
                 for r in records:
                     crop = r.get("crop_type")
                     if crop in by_crop:
                         by_crop[crop] += 1
-                        
+
                     sev = r.get("severity")
                     if sev in by_severity:
                         by_severity[sev] += 1
-                        
+
                     dis = r.get("disease_type")
                     if dis in by_disease:
                         by_disease[dis] += 1
-                        
+
                 data = {
                     "total_detections": len(records),
                     "by_crop": by_crop,
@@ -161,10 +162,10 @@ class StatsWidget(QWidget):
         canvas.fig.clear()
         ax = canvas.fig.add_subplot(111)
         ax.set_facecolor('#f5f7fa')
-        
+
         # 过滤掉数值为 0 的项
         data = {k: v for k, v in data.items() if v > 0}
-        
+
         if not data:
             ax.text(0.5, 0.5, "暂无分析数据", ha="center", va="center", fontsize=11, color="#7f8c8d")
             ax.set_title(title, fontsize=12, color='#1e2a38', weight='bold')
@@ -173,7 +174,7 @@ class StatsWidget(QWidget):
         else:
             # 调整图表子图边距，为顶部标题和底部图例留出足够空间，防止遮挡
             canvas.fig.subplots_adjust(top=0.85, bottom=0.28, left=0.1, right=0.9)
-            
+
             labels = list(data.keys())
             sizes = list(data.values())
             if not colors:
@@ -181,11 +182,11 @@ class StatsWidget(QWidget):
 
             # 绘制环形图 (width=0.35 实现内空，radius=1.1 放大圆环大小)
             wedges, texts, autotexts = ax.pie(
-                sizes, 
-                labels=None, 
-                autopct="%1.0f%%", 
-                colors=colors[:len(labels)], 
-                startangle=90, 
+                sizes,
+                labels=None,
+                autopct="%1.0f%%",
+                colors=colors[:len(labels)],
+                startangle=90,
                 pctdistance=0.8,
                 radius=1.1,
                 wedgeprops=dict(width=0.35, edgecolor='#f5f7fa', linewidth=2)
@@ -199,15 +200,15 @@ class StatsWidget(QWidget):
 
             # 极简化精美图例 (bbox_to_anchor 稍微向下移动以防止与圆环重合，ncol=2 保持美观)
             ax.legend(
-                wedges, 
-                [f"{lb} ({s})" for lb, s in zip(labels, sizes)], 
-                loc="center", 
-                bbox_to_anchor=(0.5, -0.20), 
-                ncol=2, 
-                fontsize=8, 
+                wedges,
+                [f"{lb} ({s})" for lb, s in zip(labels, sizes)],
+                loc="center",
+                bbox_to_anchor=(0.5, -0.20),
+                ncol=2,
+                fontsize=8,
                 frameon=True
             )
-            
+
             leg = ax.get_legend()
             if leg:
                 leg.get_frame().set_facecolor('#ffffff')
@@ -216,5 +217,5 @@ class StatsWidget(QWidget):
                     text.set_color('#34495e')
 
             ax.set_title(title, fontsize=12, color='#1e2a38', weight='bold', pad=10)
-            
+
         canvas.draw_idle()

@@ -34,7 +34,7 @@ class AlarmWidget(QWidget):
         self.severity_cb.currentTextChanged.connect(self._load)
         tool_bar.addWidget(self.severity_cb)
         tool_bar.addStretch()
-        
+
         self.count_label = QLabel("共 0 条")
         self.count_label.setStyleSheet("color: #7f8c8d; font-size: 13px; font-weight: 500;")
         tool_bar.addWidget(self.count_label)
@@ -59,7 +59,7 @@ class AlarmWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self._load)
         self.timer.start(interval)
-        
+
         self._load()
 
     def set_device_filter(self, device_id):
@@ -73,19 +73,19 @@ class AlarmWidget(QWidget):
     def _load(self):
         sev = self.severity_cb.currentText()
         severity = sev if sev != "全部" else None
-        
+
         res = self.api.alarm_list(
-            page=1, 
-            page_size=100, 
-            severity=severity, 
+            page=1,
+            page_size=100,
+            severity=severity,
             device_id=self.current_device_id
         )
-        
+
         if res.get("code") != 0:
             self.count_label.setText(f"加载失败: {res.get('msg') or res.get('message') or '未知错误'}")
             self.count_label.setStyleSheet("color: #e57373;")
             return
-            
+
         records = res.get("data", {}).get("records", [])
         total = res.get("data", {}).get("pagination", {}).get("total", 0)
         self.count_label.setText(f"共 {total} 条记录")
@@ -97,7 +97,7 @@ class AlarmWidget(QWidget):
             "Moderate": "#f48fb1",  # 柔美粉
             "Severe": "#e57373"     # 柔美红
         }
-        
+
         for row, d in enumerate(records):
             # 时间
             self.table.setItem(row, 0, QTableWidgetItem((d.get("timestamp") or "")[:19]))
@@ -110,14 +110,14 @@ class AlarmWidget(QWidget):
             # 病害
             disease = d.get("disease_type", "")
             disease_map = {
-                "rust": "锈病", "powdery_mildew": "白粉病", 
+                "rust": "锈病", "powdery_mildew": "白粉病",
                 "anthracnose": "炭疽病", "leafhopper": "小绿叶蝉"
             }
             self.table.setItem(row, 3, QTableWidgetItem(disease_map.get(disease, disease)))
             # 置信度
             conf = d.get("max_conf", 0)
             self.table.setItem(row, 4, QTableWidgetItem(f"{conf*100:.1f}%" if conf else "--"))
-            
+
             # 严重程度 (带背景色的 Badge)
             sev_str = d.get("severity", "")
             sev_item = QTableWidgetItem(sev_str)
@@ -125,7 +125,7 @@ class AlarmWidget(QWidget):
             sev_item.setForeground(Qt.white)
             sev_item.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row, 5, sev_item)
-            
+
             # 风险等级
             risk = d.get("linkage_risk_level", "")
             risk_map = {"low": "低风险", "medium": "中风险", "high": "高风险"}
@@ -139,7 +139,7 @@ class AlarmWidget(QWidget):
                 "none": "无特别处置"
             }
             self.table.setItem(row, 7, QTableWidgetItem(action_map.get(action, action or "--")))
-            
+
             # 设置文字居中对齐
             for col in range(8):
                 if col != 5:
